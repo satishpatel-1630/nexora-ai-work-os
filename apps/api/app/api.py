@@ -16,6 +16,10 @@ from apps.api.app.schemas import (
     TaskUpdate,
 )
 from apps.api.app.services import ApprovalService, ProjectService
+from intelligence.persistence import create_run, get_run
+from intelligence.schemas import IntelligenceRunCreate, IntelligenceRunRead
+from intelligence.orchestration import execute_run
+
 
 router = APIRouter(prefix="/api/v1")
 
@@ -100,3 +104,60 @@ async def approve(approval_id: UUID, db: AsyncSession = Depends(get_db)):
 @router.post("/approvals/{approval_id}/reject", response_model=ApprovalRead)
 async def reject(approval_id: UUID, db: AsyncSession = Depends(get_db)):
     return await ApprovalService(db).resolve(approval_id, ApprovalStatus.REJECTED)
+
+
+@router.post("/intelligence/runs", response_model=IntelligenceRunRead, status_code=status.HTTP_201_CREATED)
+async def create_intelligence_run(data: IntelligenceRunCreate, db: AsyncSession = Depends(get_db)):
+    return await create_run(db, data.request, data.project_id, data.task_id)
+
+@router.get("/intelligence/runs", response_model=list[IntelligenceRunRead])
+async def list_intelligence_runs(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import IntelligenceRun
+    return list((await db.execute(select(IntelligenceRun).order_by(IntelligenceRun.created_at.desc()).limit(50))).scalars().all())
+
+@router.get("/intelligence/runs/{run_id}", response_model=IntelligenceRunRead)
+async def get_intelligence_run(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    row = await get_run(db, run_id)
+    if row is None:
+        from apps.api.app.services import NotFoundError
+        raise NotFoundError("INTELLIGENCE_RUN_NOT_FOUND", "Intelligence run was not found.")
+    return row
+
+@router.post("/intelligence/runs/{run_id}/execute", response_model=IntelligenceRunRead)
+async def execute_intelligence_run(run_id: UUID):
+    row = await execute_run(run_id)
+    if row is None:
+        from apps.api.app.services import NotFoundError
+        raise NotFoundError("INTELLIGENCE_RUN_NOT_FOUND", "Intelligence run was not found.")
+    return row
+
+@router.get("/intelligence/runs/{run_id}/research")
+async def get_intelligence_research(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import ResearchFindingRecord
+    return list((await db.execute(select(ResearchFindingRecord).where(ResearchFindingRecord.intelligence_run_id==run_id))).scalars().all())
+
+@router.get("/intelligence/runs/{run_id}/plan")
+async def get_intelligence_plan(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import TaskPlanRecord
+    return (await db.execute(select(TaskPlanRecord).where(TaskPlanRecord.intelligence_run_id==run_id))).scalar_one_or_none()
+
+@router.get("/intelligence/runs/{run_id}/briefs")
+async def get_intelligence_briefs(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import SpecialistBriefRecord
+    return list((await db.execute(select(SpecialistBriefRecord).where(SpecialistBriefRecord.intelligence_run_id==run_id))).scalars().all())
+
+@router.get("/intelligence/runs/{run_id}/prompts")
+async def get_intelligence_prompts(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import PromptArtifactRecord
+    return list((await db.execute(select(PromptArtifactRecord).where(PromptArtifactRecord.intelligence_run_id==run_id))).scalars().all())
+
+@router.get("/intelligence/runs/{run_id}/usage")
+async def get_intelligence_usage(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from apps.api.app.db.models import ModelInvocation
+    return list((await db.execute(select(ModelInvocation).where(ModelInvocation.intelligence_run_id==run_id))).scalars().all())
