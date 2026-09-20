@@ -1,6 +1,9 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
+import redis.asyncio as redis
+from apps.api.app.config import get_settings
+from apps.api.app.contracts import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.app.db.base import get_db
@@ -18,7 +21,7 @@ from apps.api.app.schemas import (
 from apps.api.app.services import ApprovalService, ProjectService
 from intelligence.persistence import create_run, get_run
 from intelligence.schemas import IntelligenceRunCreate, IntelligenceRunRead
-from intelligence.orchestration import execute_run
+
 
 
 router = APIRouter(prefix="/api/v1")
@@ -125,12 +128,24 @@ async def get_intelligence_run(run_id: UUID, db: AsyncSession = Depends(get_db))
     return row
 
 @router.post("/intelligence/runs/{run_id}/execute", response_model=IntelligenceRunRead)
-async def execute_intelligence_run(run_id: UUID):
-    row = await execute_run(run_id)
+async def execute_intelligence_run(run_id: UUID, db: AsyncSession = Depends(get_db)):
+    row = await get_run(db, run_id)
     if row is None:
         from apps.api.app.services import NotFoundError
         raise NotFoundError("INTELLIGENCE_RUN_NOT_FOUND", "Intelligence run was not found.")
-    return row
+    client = redis.from_url(get_settings().redis_url, decode_responses=True)
+    try:
+        from dataclasses import asdict
+        from uuid import uuid4
+        job = Job(id=uuid4(), type="INTELLIGENCE_RUN", payload={"run_id": str(run_id)})
+        await client.rpush("nexora:jobs", __import__("json").dumps(asdict(job), default=str))
+        row.status = "pending"
+        row.current_stage = "intent"
+        await db.commit()
+        await db.refresh(row)
+        return row
+    finally:
+        await client.aclose()
 
 @router.get("/intelligence/runs/{run_id}/research")
 async def get_intelligence_research(run_id: UUID, db: AsyncSession = Depends(get_db)):
