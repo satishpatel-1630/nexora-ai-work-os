@@ -13,7 +13,6 @@ from apps.api.app.db.models import (
     Task,
 )
 from apps.api.app.repositories import ApprovalRepository, ProjectRepository, TaskRepository
-from apps.api.app.repositories import ApprovalRepository, ProjectRepository, TaskRepository
 from apps.api.app.schemas import (
     ApprovalCreate,
     ProjectCreate,
