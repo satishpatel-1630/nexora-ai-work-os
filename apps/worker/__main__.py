@@ -1,3 +1,11 @@
 import asyncio
+
 from apps.worker.runtime import WorkerRuntime
-if __name__=="__main__": asyncio.run(WorkerRuntime().run())
+
+
+def main():
+    asyncio.run(WorkerRuntime().run())
+
+
+if __name__ == "__main__":
+    main()
