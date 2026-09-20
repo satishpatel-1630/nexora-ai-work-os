@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
@@ -16,7 +16,7 @@ class IntentResult(BaseModel):
 
 class ResearchFinding(BaseModel):
     id:UUID=Field(default_factory=uuid4); query:str; title:str; url:str|None=None; source:str|None=None; evidence:str=""; published_at:datetime|None=None
-    retrieved_at:datetime=Field(default_factory=lambda:datetime.now(timezone.utc)); relevance:float=Field(default=.5,ge=0,le=1); confidence:float=Field(default=.5,ge=0,le=1)
+    retrieved_at:datetime=Field(default_factory=lambda:datetime.now(UTC)); relevance:float=Field(default=.5,ge=0,le=1); confidence:float=Field(default=.5,ge=0,le=1)
     citations:list[dict[str,Any]]=Field(default_factory=list); provider:str="mock"; metadata:dict[str,Any]=Field(default_factory=dict)
 
 class TaskIntelligenceResult(BaseModel):
