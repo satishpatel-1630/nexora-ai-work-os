@@ -9,7 +9,7 @@ class NotFoundError(Exception):
 class ProjectService:
     def __init__(self,db:AsyncSession): self.db=db
     async def create(self,data:ProjectCreate):
-        p=Project(name=data.name,description=data.description,metadata=data.metadata); self.db.add(p); await self.db.flush(); self.db.add(Event(event_type="PROJECT_CREATED",project_id=p.id,payload={"name":p.name})); await self.db.commit(); await self.db.refresh(p); return p
+        p=Project(name=data.name,description=data.description,metadata_json=data.metadata); self.db.add(p); await self.db.flush(); self.db.add(Event(event_type="PROJECT_CREATED",project_id=p.id,payload={"name":p.name})); await self.db.commit(); await self.db.refresh(p); return p
     async def list(self):
         r=await self.db.execute(select(Project).order_by(Project.created_at.desc())); return list(r.scalars().all())
     async def get(self,pid:UUID):
@@ -17,7 +17,7 @@ class ProjectService:
         if p is None: raise NotFoundError("PROJECT_NOT_FOUND","Project was not found.")
         return p
     async def create_task(self,pid:UUID,data:TaskCreate):
-        await self.get(pid); t=Task(project_id=pid,title=data.title,description=data.description,priority=data.priority,metadata=data.metadata); self.db.add(t); await self.db.flush(); self.db.add(Event(event_type="TASK_CREATED",project_id=pid,task_id=t.id,payload={"title":t.title})); await self.db.commit(); await self.db.refresh(t); return t
+        await self.get(pid); t=Task(project_id=pid,title=data.title,description=data.description,priority=data.priority,metadata_json=data.metadata); self.db.add(t); await self.db.flush(); self.db.add(Event(event_type="TASK_CREATED",project_id=pid,task_id=t.id,payload={"title":t.title})); await self.db.commit(); await self.db.refresh(t); return t
     async def list_tasks(self,pid:UUID):
         await self.get(pid); r=await self.db.execute(select(Task).where(Task.project_id==pid).order_by(Task.created_at.desc())); return list(r.scalars().all())
     async def get_task(self,tid:UUID):
