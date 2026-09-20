@@ -1,4 +1,3 @@
-from logging.config import fileConfig
 import asyncio
 from alembic import context
 from sqlalchemy import pool
@@ -8,7 +7,7 @@ from apps.api.app.db.models import Base
 config=context.config
 settings=get_settings()
 config.set_main_option("sqlalchemy.url",settings.database_url.replace("%","%%"))
-if config.config_file_name: fileConfig(config.config_file_name)
+
 target_metadata=Base.metadata
 def run_migrations_offline():
     context.configure(url=settings.database_url,target_metadata=target_metadata,literal_binds=True,dialect_opts={"paramstyle":"named"})

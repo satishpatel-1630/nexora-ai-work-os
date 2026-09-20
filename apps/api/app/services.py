@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -161,7 +161,7 @@ class ApprovalService:
         if approval.status != ApprovalStatus.PENDING:
             raise ValueError("Only pending approvals can be resolved.")
         approval.status = status
-        approval.resolved_at = datetime.now(timezone.utc)
+        approval.resolved_at = datetime.now(UTC)
         self.db.add(
             Event(
                 event_type="APPROVAL_GRANTED" if status == ApprovalStatus.APPROVED else "APPROVAL_REJECTED",
