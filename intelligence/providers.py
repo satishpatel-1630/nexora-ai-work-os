@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json,time
-from typing import Any,Protocol
+from typing import Protocol
 from .models import ModelRequest,ModelResponse,ModelUsage,ResearchFinding
 from apps.api.app.config import get_settings
 
