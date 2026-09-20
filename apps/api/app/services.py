@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.app.db.models import (
@@ -11,6 +11,7 @@ from apps.api.app.db.models import (
     Project,
     Task,
 )
+from apps.api.app.repositories import ApprovalRepository, ProjectRepository, TaskRepository
 from apps.api.app.schemas import (
     ApprovalCreate,
     ProjectCreate,
@@ -48,7 +49,7 @@ class ProjectService:
         return list(result.scalars().all())
 
     async def get(self, project_id: UUID):
-        project = await self.db.get(Project, project_id)
+        project = await self.projects.get(project_id)
         if project is None:
             raise NotFoundError("PROJECT_NOT_FOUND", "Project was not found.")
         return project
@@ -66,7 +67,7 @@ class ProjectService:
 
     async def delete(self, project_id: UUID):
         project = await self.get(project_id)
-        await self.db.delete(project)
+        await self.projects.delete(project)
         await self.db.commit()
 
     async def create_task(self, project_id: UUID, data: TaskCreate):
@@ -93,7 +94,7 @@ class ProjectService:
         return list(result.scalars().all())
 
     async def get_task(self, task_id: UUID):
-        task = await self.db.get(Task, task_id)
+        task = await self.tasks.get(task_id)
         if task is None:
             raise NotFoundError("TASK_NOT_FOUND", "Task was not found.")
         return task
@@ -118,7 +119,7 @@ class ProjectService:
 
     async def delete_task(self, task_id: UUID):
         task = await self.get_task(task_id)
-        await self.db.delete(task)
+        await self.tasks.delete(task)
         await self.db.commit()
 
 
@@ -154,7 +155,7 @@ class ApprovalService:
         return list(result.scalars().all())
 
     async def get(self, approval_id: UUID):
-        approval = await self.db.get(ApprovalRequest, approval_id)
+        approval = await self.approvals.get(approval_id)
         if approval is None:
             raise NotFoundError("APPROVAL_NOT_FOUND", "Approval request was not found.")
         return approval
