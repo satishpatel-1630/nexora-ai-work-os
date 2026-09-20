@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel,Field
-from .models import IntelligenceResult,RunStatus,Stage
+from .models import RunStatus, Stage
 class IntelligenceRunCreate(BaseModel):
     request:str=Field(min_length=1,max_length=20000); project_id:UUID|None=None; task_id:UUID|None=None; mode:str="analyze"
 class IntelligenceRunRead(BaseModel):
