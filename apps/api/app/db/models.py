@@ -13,14 +13,14 @@ class Project(Base):
     __tablename__="projects"
     id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True),primary_key=True,default=uuid4)
     name:Mapped[str]=mapped_column(String(200)); description:Mapped[str|None]=mapped_column(Text,nullable=True)
-    status:Mapped[ProjectStatus]=mapped_column(String(32),default=ProjectStatus.ACTIVE); metadata:Mapped[dict]=mapped_column(JSONB,default=dict)
+    status:Mapped[ProjectStatus]=mapped_column(String(32),default=ProjectStatus.ACTIVE); metadata_json:Mapped[dict]=mapped_column("metadata",JSONB,default=dict)
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now()); updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now())
     tasks:Mapped[list["Task"]]=relationship(back_populates="project",cascade="all, delete-orphan")
 class Task(Base):
     __tablename__="tasks"
     id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True),primary_key=True,default=uuid4); project_id:Mapped[UUID]=mapped_column(ForeignKey("projects.id",ondelete="CASCADE"),index=True)
     title:Mapped[str]=mapped_column(String(240)); description:Mapped[str|None]=mapped_column(Text,nullable=True); status:Mapped[TaskStatus]=mapped_column(String(32),default=TaskStatus.TODO)
-    priority:Mapped[int]=mapped_column(Integer,default=0); metadata:Mapped[dict]=mapped_column(JSONB,default=dict)
+    priority:Mapped[int]=mapped_column(Integer,default=0); metadata_json:Mapped[dict]=mapped_column("metadata",JSONB,default=dict)
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now()); updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now())
     project:Mapped[Project]=relationship(back_populates="tasks")
 class Event(Base):
@@ -32,5 +32,5 @@ class ApprovalRequest(Base):
     __tablename__="approval_requests"
     id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True),primary_key=True,default=uuid4); action:Mapped[str]=mapped_column(String(240)); target:Mapped[str]=mapped_column(String(500)); reason:Mapped[str]=mapped_column(Text)
     risk_level:Mapped[RiskLevel]=mapped_column(String(40)); status:Mapped[ApprovalStatus]=mapped_column(String(32),default=ApprovalStatus.PENDING,index=True)
-    proposed_changes:Mapped[dict]=mapped_column(JSONB,default=dict); estimated_cost:Mapped[float|None]=mapped_column(nullable=True); preview:Mapped[dict]=mapped_column(JSONB,default=dict); metadata:Mapped[dict]=mapped_column(JSONB,default=dict)
+    proposed_changes:Mapped[dict]=mapped_column(JSONB,default=dict); estimated_cost:Mapped[float|None]=mapped_column(nullable=True); preview:Mapped[dict]=mapped_column(JSONB,default=dict); metadata_json:Mapped[dict]=mapped_column("metadata",JSONB,default=dict)
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now()); resolved_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
