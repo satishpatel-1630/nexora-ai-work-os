@@ -3,6 +3,7 @@ from uuid import UUID,uuid4
 from .models import *
 from .providers import MockProvider,MockResearchProvider,GeminiProvider,GeminiResearchProvider
 from .registry import select_specialists
+from .routing import ModelRouter
 from apps.api.app.config import get_settings
 
 class IntelligencePipeline:
@@ -36,7 +37,7 @@ class IntelligencePipeline:
                 result.prompts.append(prompt); result.critiques.append(PromptCritique(score=.9,recommendations=["Keep requirements explicit."],issues=[]))
             result.current_stage=Stage.ROUTING
             result.current_stage=Stage.EXECUTION
-            final=await self.provider.complete(ModelRequest(model=self.settings.gemini_model,system_instruction="Return a concise structured result.",input=request,structured_output_schema={"kind":"final"}))
+            final=await self.provider.complete(ModelRequest(model=decision.model,system_instruction="Return a concise structured result.",input=request,structured_output_schema={"kind":"final"}))
             result.model_usage.append(final.usage); result.final_output=final.structured_output or {"text":final.text}
             result.current_stage=Stage.COMPLETED; result.status=RunStatus.COMPLETED
             return result
