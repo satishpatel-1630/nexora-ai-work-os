@@ -7,6 +7,6 @@ def test_api_exposes_phase1_routes():
     api_paths = {route.path for route in router.routes if hasattr(route, "path")}
     assert "/health" in app_paths
     assert "/ready" in app_paths
-    assert "/api/v1/projects" in {"/api/v1" + path for path in api_paths}
-    assert "/api/v1/approvals" in {"/api/v1" + path for path in api_paths}
-    assert "/api/v1/intelligence/runs" in {"/api/v1" + path for path in api_paths}
+    assert "/api/v1/projects" in api_paths
+    assert "/api/v1/approvals" in api_paths
+    assert "/api/v1/intelligence/runs" in api_paths
