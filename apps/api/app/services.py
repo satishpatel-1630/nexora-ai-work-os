@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.app.db.models import (
@@ -11,6 +10,7 @@ from apps.api.app.db.models import (
     Project,
     Task,
 )
+from apps.api.app.repositories import ApprovalRepository, ProjectRepository, TaskRepository
 from apps.api.app.repositories import ApprovalRepository, ProjectRepository, TaskRepository
 from apps.api.app.schemas import (
     ApprovalCreate,
@@ -30,6 +30,8 @@ class NotFoundError(Exception):
 class ProjectService:
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.projects = ProjectRepository(db)
+        self.tasks = TaskRepository(db)
 
     async def create(self, data: ProjectCreate):
         project = Project(
@@ -37,16 +39,14 @@ class ProjectService:
             description=data.description,
             metadata_json=data.metadata,
         )
-        self.db.add(project)
-        await self.db.flush()
+        await self.projects.create(project)
         self.db.add(Event(event_type="PROJECT_CREATED", project_id=project.id, payload={"name": project.name}))
         await self.db.commit()
         await self.db.refresh(project)
         return project
 
     async def list(self):
-        result = await self.db.execute(select(Project).order_by(Project.created_at.desc()))
-        return list(result.scalars().all())
+        return await self.projects.list()
 
     async def get(self, project_id: UUID):
         project = await self.projects.get(project_id)
@@ -79,8 +79,7 @@ class ProjectService:
             priority=data.priority,
             metadata_json=data.metadata,
         )
-        self.db.add(task)
-        await self.db.flush()
+        await self.tasks.create(task)
         self.db.add(Event(event_type="TASK_CREATED", project_id=project_id, task_id=task.id, payload={"title": task.title}))
         await self.db.commit()
         await self.db.refresh(task)
@@ -88,10 +87,7 @@ class ProjectService:
 
     async def list_tasks(self, project_id: UUID):
         await self.get(project_id)
-        result = await self.db.execute(
-            select(Task).where(Task.project_id == project_id).order_by(Task.created_at.desc())
-        )
-        return list(result.scalars().all())
+        return await self.tasks.list_for_project(project_id)
 
     async def get_task(self, task_id: UUID):
         task = await self.tasks.get(task_id)
@@ -126,6 +122,7 @@ class ProjectService:
 class ApprovalService:
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.approvals = ApprovalRepository(db)
 
     async def create(self, data: ApprovalCreate):
         approval = ApprovalRequest(
@@ -138,8 +135,7 @@ class ApprovalService:
             preview=data.preview,
             metadata_json=data.metadata,
         )
-        self.db.add(approval)
-        await self.db.flush()
+        await self.approvals.create(approval)
         self.db.add(
             Event(
                 event_type="APPROVAL_REQUESTED",
@@ -151,8 +147,7 @@ class ApprovalService:
         return approval
 
     async def list(self):
-        result = await self.db.execute(select(ApprovalRequest).order_by(ApprovalRequest.created_at.desc()))
-        return list(result.scalars().all())
+        return await self.approvals.list()
 
     async def get(self, approval_id: UUID):
         approval = await self.approvals.get(approval_id)
