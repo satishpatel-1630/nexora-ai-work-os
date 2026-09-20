@@ -17,7 +17,11 @@ USER → WEB → API → APPLICATION SERVICES → DOMAIN → REPOSITORIES → PO
                          └── WORKER → REDIS
 ```
 
-Future phases add intelligence execution, MCP, memory/RAG, media, social, integrations, evaluation and durable workflows.
+## Phase 2
+
+The intelligence engine is executable with a credential-free MockProvider and an optional Gemini provider. It adds intent analysis, research, task intelligence, planning, specialist selection, specialist briefs, prompt orchestration, model/cost routing, persisted intelligence runs and a Command Center. See `docs/PHASE_2_INTELLIGENCE.md`.
+
+Future phases add executable agents, MCP, memory/RAG, media, social, integrations, evaluation and durable workflows.
 
 ## Local development
 
