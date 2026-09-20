@@ -8,3 +8,4 @@
 - Added policy, capability, tool, agent and intelligence contracts.
 - Added initial NEXORA web dashboard.
 - Added Docker Compose and GitHub Actions CI.
+\n## Unreleased — Phase 2\n- Added executable intelligence pipeline, research abstraction, specialist registry, prompt orchestration, model/cost routing, persisted intelligence artifacts, Redis worker execution and Command Center UI.\n
