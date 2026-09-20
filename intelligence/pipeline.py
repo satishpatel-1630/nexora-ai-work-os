@@ -26,7 +26,7 @@ class IntelligencePipeline:
             plan=await self.provider.complete(ModelRequest(model=self.settings.gemini_model,input=request,structured_output_schema={"kind":"plan"},max_output_tokens=1800))
             result.plan=TaskPlan.model_validate(plan.structured_output or {})
             result.current_stage=Stage.SPECIALISTS
-            result.specialists=select_specialists(result.intent.domain,result.intent.requested_deliverables,result.intent.requires_research)
+            result.specialists=select_specialists(result.intent.domain,result.intent.requested_deliverables,result.intent.requires_research)\n            if result.intent.requires_research and self.settings.ai_research_enabled:\n                specialist_findings=[]\n                for specialist in result.specialists.specialists:\n                    specialist_findings.extend(await self.research_provider.research(f"{request} requirements for {specialist} specialist"))\n                result.research.extend(specialist_findings)
             result.current_stage=Stage.BRIEFS
             for name in result.specialists.specialists:
                 result.briefs.append(SpecialistBrief(specialist=name,objective=result.task_intelligence.goal,task_research="\n".join(x.evidence for x in result.research),requirements=result.task_intelligence.requirements,constraints=result.task_intelligence.constraints,audience=result.intent.audience,output_schema={"type":"object"},quality_criteria=["fulfill requirements"],failure_conditions=["missing required deliverables"]))
