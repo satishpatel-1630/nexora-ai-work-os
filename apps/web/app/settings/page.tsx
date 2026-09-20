@@ -1,0 +1,2 @@
+"use client";import {useEffect,useState} from "react";import {api} from "../../lib/api";
+export default function SettingsPage(){const[h,setH]=useState("checking"),[r,setR]=useState("checking");useEffect(()=>{void api.health().then(()=>setH("connected")).catch(()=>setH("unavailable"));void api.readiness().then(()=>setR("ready")).catch(()=>setR("not ready"))},[]);return <main style={{padding:32,maxWidth:800,margin:"0 auto"}}><h1>Settings</h1><p>Environment: development</p><p>API: {h}</p><p>Dependencies: {r}</p><p>Provider credentials are never displayed.</p></main>}

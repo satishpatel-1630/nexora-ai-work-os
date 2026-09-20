@@ -1,0 +1,3 @@
+from typing import Any,Protocol
+class Planner(Protocol):
+    async def plan(self,task:dict[str,Any])->dict[str,Any]: ...

@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-export const metadata: Metadata = { title: "NEXORA", description: "Personal AI Work OS" };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body style={{margin:0}}>{children}</body></html>;
-}
+import type {Metadata} from "next";import "./globals.css";import {Nav} from "../components/Nav";
+export const metadata:Metadata={title:"NEXORA — Personal AI Work OS",description:"Research. Plan. Execute. Evaluate. Automate."};
+export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){return <html lang="en"><body><Nav/>{children}</body></html>}

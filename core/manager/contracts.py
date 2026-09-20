@@ -1,0 +1,3 @@
+from typing import Any,Protocol
+class Manager(Protocol):
+    async def handle(self,user_request:str,context:dict[str,Any]|None=None)->dict[str,Any]: ...

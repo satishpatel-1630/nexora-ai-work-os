@@ -1,0 +1,2 @@
+import Link from "next/link";
+export function Nav(){return <nav style={{display:"flex",gap:18,padding:"18px 28px",borderBottom:"1px solid #20242b"}}><strong>NEXORA</strong><Link href="/">Dashboard</Link><Link href="/projects">Projects</Link><Link href="/approvals">Approvals</Link><Link href="/settings">Settings</Link></nav>}

@@ -1,3 +1,2 @@
-export default function Home() {
-  return <main style={{minHeight:"100vh",display:"grid",placeItems:"center",background:"#08090b",color:"#f5f7fa",fontFamily:"Arial,sans-serif",padding:32}}><section><p>PERSONAL AI WORK OS</p><h1>NEXORA</h1><p>Research. Plan. Execute. Evaluate. Automate.</p></section></main>;
-}
+import Link from "next/link";
+export default function Home(){return <main style={{padding:40,maxWidth:1100,margin:"0 auto"}}><p style={{opacity:.6,letterSpacing:2}}>PERSONAL AI WORK OS</p><h1 style={{fontSize:56,margin:"10px 0"}}>NEXORA</h1><p style={{fontSize:20,opacity:.75}}>Research. Plan. Execute. Evaluate. Automate.</p><div style={{display:"flex",gap:12,marginTop:30}}><Link href="/projects" style={{padding:"12px 18px",border:"1px solid #343a43",borderRadius:10}}>Open Projects</Link><Link href="/approvals" style={{padding:"12px 18px",border:"1px solid #343a43",borderRadius:10}}>Review Approvals</Link></div></main>}
